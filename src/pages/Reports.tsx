@@ -16,6 +16,7 @@ import {
   BarChart,
   Bar
 } from 'recharts';
+import jsPDF from 'jspdf';
 
 export default function Reports() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -24,12 +25,240 @@ export default function Reports() {
   const generateReport = async (type: string) => {
     setIsGenerating(true);
     
-    // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate report generation delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Create comprehensive PDF report
+    const doc = new jsPDF('p', 'mm', 'a4');
+    let yPosition = 20;
+    
+    // Title Page
+    doc.setFontSize(20);
+    doc.setTextColor(46, 125, 50); // agro-green color
+    doc.text('🌱 AgroSmart Farm Report', 20, yPosition);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+    doc.text(`Report Type: ${type}`, 20, yPosition);
+    yPosition += 8;
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, yPosition);
+    yPosition += 8;
+    doc.text('Farm Location: Jorethang, South Sikkim', 20, yPosition);
+    yPosition += 20;
+
+    // Farm Overview Section
+    doc.setFontSize(16);
+    doc.setTextColor(46, 125, 50);
+    doc.text('📊 Farm Overview & KPIs', 20, yPosition);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    kpis.forEach((kpi, index) => {
+      doc.text(`• ${kpi.title}: ${kpi.value} (${kpi.subtitle})`, 25, yPosition);
+      yPosition += 6;
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+    });
+
+    yPosition += 10;
+
+    // Current Sensor Status
+    doc.setFontSize(16);
+    doc.setTextColor(46, 125, 50);
+    doc.text('🌡️ Current Sensor Readings', 20, yPosition);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    const latest = sensorReadings[sensorReadings.length - 1];
+    const sensorData = [
+      { label: 'Soil Moisture', value: `${latest.soilMoisture}%`, status: latest.soilMoisture > 35 ? 'Good' : 'Low' },
+      { label: 'Soil Temperature', value: `${latest.soilTemp}°C`, status: 'Normal' },
+      { label: 'Air Temperature', value: `${latest.airTemp}°C`, status: 'Normal' },
+      { label: 'Air Humidity', value: `${latest.airHumidity}%`, status: 'Optimal' },
+      { label: 'Salinity', value: `${latest.salinity} ppt`, status: 'Normal' },
+      { label: 'Water Tank Level', value: `${latest.waterLevel}%`, status: latest.waterLevel > 50 ? 'Good' : 'Low' },
+      { label: 'Water Pressure', value: `${latest.pressure} bar`, status: 'Normal' },
+      { label: 'Water Quality (pH)', value: `${latest.waterQuality}`, status: 'Good' }
+    ];
+
+    sensorData.forEach(sensor => {
+      doc.text(`• ${sensor.label}: ${sensor.value} - Status: ${sensor.status}`, 25, yPosition);
+      yPosition += 6;
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+    });
+
+    yPosition += 10;
+
+    // Historical Trends
+    doc.setFontSize(16);
+    doc.setTextColor(46, 125, 50);
+    doc.text('📈 Historical Sensor Trends', 20, yPosition);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    doc.text('Recent 6 Hours Sensor Data:', 25, yPosition);
+    yPosition += 8;
+    doc.text('Time      Soil M%  Soil T°C  Air T°C  Humidity%  Tank%  Press', 25, yPosition);
+    yPosition += 6;
+
+    sensorReadings.forEach(reading => {
+      const line = `${reading.ts}     ${reading.soilMoisture}%      ${reading.soilTemp}°C     ${reading.airTemp}°C     ${reading.airHumidity}%       ${reading.waterLevel}%    ${reading.pressure}`;
+      doc.text(line, 25, yPosition);
+      yPosition += 5;
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+    });
+
+    yPosition += 15;
+
+    // ML Model Performance
+    doc.setFontSize(16);
+    doc.setTextColor(46, 125, 50);
+    doc.text('🤖 ML Model & Crop Intelligence', 20, yPosition);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    const mlMetrics = [
+      { metric: 'Prediction Accuracy', value: '92%', trend: '+3% this week' },
+      { metric: 'Model MSE', value: '0.045', trend: 'Stable' },
+      { metric: 'Training Episodes', value: '1,247', trend: 'Reinforcement Learning Active' },
+      { metric: 'Water Recommendation Accuracy', value: '89%', trend: '+5% improvement' },
+      { metric: 'False Alert Rate', value: '2.3%', trend: '-23% reduction' }
+    ];
+
+    mlMetrics.forEach(metric => {
+      doc.text(`• ${metric.metric}: ${metric.value} (${metric.trend})`, 25, yPosition);
+      yPosition += 6;
+    });
+
+    yPosition += 10;
+
+    // Crop Intelligence Insights
+    doc.text('Current Crop Recommendations:', 25, yPosition);
+    yPosition += 8;
+    doc.text('• Potato: 2.1L water needed (soil moisture below optimal)', 25, yPosition);
+    yPosition += 6;
+    doc.text('• Maize: 1.8L water needed (conditions good)', 25, yPosition);
+    yPosition += 6;
+    doc.text('• Tomato: 2.5L water needed (high water requirement crop)', 25, yPosition);
+    yPosition += 15;
+
+    // Water Management
+    doc.setFontSize(16);
+    doc.setTextColor(46, 125, 50);
+    doc.text('💧 Water Management & Efficiency', 20, yPosition);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    const waterMetrics = [
+      'Water Efficiency: 48% savings vs traditional irrigation',
+      'Average Water Usage: 1.8L per plant',
+      'Tank Utilization: 76% average level maintained',
+      'Drip Irrigation Uptime: 99.2%',
+      'Rainwater Collection: 234L this week',
+      'Estimated Water Savings: 1,240L this month'
+    ];
+
+    waterMetrics.forEach(metric => {
+      doc.text(`• ${metric}`, 25, yPosition);
+      yPosition += 6;
+    });
+
+    yPosition += 15;
+
+    // Alert Summary
+    doc.setFontSize(16);
+    doc.setTextColor(46, 125, 50);
+    doc.text('🚨 Recent Alerts & Actions', 20, yPosition);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    const alerts = [
+      { time: '08:50', alert: 'Soil moisture below threshold at Zone A', action: 'Auto-irrigation activated' },
+      { time: '08:45', alert: 'Tank water level dropped below 75%', action: 'Rainwater pump activated' },
+      { time: '08:40', alert: 'Rover battery low (25%)', action: 'Charging station return initiated' },
+      { time: '07:30', alert: 'High salinity detected in Zone B', action: 'Dilution system activated' }
+    ];
+
+    alerts.forEach(alert => {
+      doc.text(`• ${alert.time}: ${alert.alert}`, 25, yPosition);
+      yPosition += 5;
+      doc.text(`  Action: ${alert.action}`, 30, yPosition);
+      yPosition += 8;
+    });
+
+    yPosition += 15;
+
+    // Weather Integration
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(16);
+    doc.setTextColor(46, 125, 50);
+    doc.text('🌤️ Weather Impact & Forecasting', 20, yPosition);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    doc.text('• Current Weather: Partly cloudy, 24°C', 25, yPosition);
+    yPosition += 6;
+    doc.text('• 3-Day Forecast: Light rain expected (15mm)', 25, yPosition);
+    yPosition += 6;
+    doc.text('• Rover Safety: All-clear, no harsh weather alerts', 25, yPosition);
+    yPosition += 6;
+    doc.text('• Solar Radiation: 680 W/m² (optimal for growth)', 25, yPosition);
+    yPosition += 15;
+
+    // Recommendations
+    doc.setFontSize(16);
+    doc.setTextColor(46, 125, 50);
+    doc.text('💡 Recommendations & Next Actions', 20, yPosition);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    const recommendations = [
+      'Increase irrigation frequency in Zone A due to low soil moisture',
+      'Monitor salinity levels closely in Zone B',
+      'Schedule rover battery maintenance',
+      'Prepare for incoming rainfall - adjust irrigation schedule',
+      'Consider expanding rainwater harvesting capacity',
+      'Update ML model with latest crop yield data'
+    ];
+
+    recommendations.forEach(rec => {
+      doc.text(`• ${rec}`, 25, yPosition);
+      yPosition += 8;
+    });
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text('Generated by AgroSmart - Smart Agriculture System for Hilly Regions', 20, 285);
+    doc.text(`Page 1 of ${doc.getNumberOfPages()} | ${new Date().toLocaleDateString()}`, 160, 285);
+
+    // Save the PDF
+    doc.save(`agrosmart-${type.toLowerCase()}-report-${new Date().toISOString().split('T')[0]}.pdf`);
     
     toast({
-      title: "Report Generated",
-      description: `${type} report has been generated and is ready for download.`,
+      title: "Report Generated Successfully! 📄",
+      description: `Comprehensive ${type} report has been downloaded with all farm metrics, ML insights, and recommendations.`,
     });
     
     setIsGenerating(false);

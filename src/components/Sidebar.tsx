@@ -21,7 +21,7 @@ export default function Sidebar() {
   const location = useLocation();
 
   return (
-    <div className="flex h-full w-64 flex-col bg-agro-bg-overlay border-r">
+    <div className="flex h-full w-60 flex-col bg-agro-bg-overlay border-r">
       <div className="flex h-14 items-center border-b px-6">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="AgroSmart" className="h-8 w-8" />
