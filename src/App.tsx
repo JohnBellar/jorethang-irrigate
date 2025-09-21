@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
-import { SidebarProvider } from "./contexts/SidebarContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Map from "./pages/Map";
@@ -17,17 +16,15 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => (
-  <SidebarProvider>
-    <div className="flex min-h-screen bg-gradient-to-br from-background to-agro-bg-overlay">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 p-6 overflow-auto">
-          {children}
-        </main>
-      </div>
+  <div className="flex min-h-screen bg-gradient-to-br from-background to-agro-bg-overlay">
+    <Sidebar />
+    <div className="flex-1 flex flex-col ml-60">
+      <Header />
+      <main className="flex-1 p-6 overflow-auto">
+        {children}
+      </main>
     </div>
-  </SidebarProvider>
+  </div>
 );
 
 const App = () => (
