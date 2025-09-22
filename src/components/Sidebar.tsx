@@ -5,9 +5,11 @@ import {
   Map, 
   BarChart3, 
   Droplets,
-  Settings
+  Settings,
+  X
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -19,15 +21,34 @@ const navigation = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const { isOpen, close } = useSidebar();
+
+  if (!isOpen) return null;
 
   return (
-    <div className="flex h-full w-60 flex-col bg-agro-bg-overlay border-r">
-      <div className="flex h-14 items-center border-b px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="AgroSmart" className="h-8 w-8" />
-          <span className="font-bold text-agro-green">AgroSmart</span>
-        </Link>
-      </div>
+    <>
+      {/* Overlay */}
+      <div 
+        className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+        onClick={close}
+      />
+      
+      {/* Sidebar */}
+      <div className="fixed left-0 top-0 z-50 flex h-full w-60 flex-col bg-agro-bg-overlay border-r shadow-lg transform transition-transform duration-300 ease-in-out">
+        <div className="flex h-14 items-center border-b px-6 justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="AgroSmart" className="h-8 w-8" />
+            <span className="font-bold text-agro-green">AgroSmart</span>
+          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={close}
+            className="h-9 w-9 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       <nav className="flex-1 space-y-1 p-4">
         {navigation.map((item) => {
           const isActive = location.pathname === item.href;
@@ -56,7 +77,8 @@ export default function Sidebar() {
             <span className="text-xs text-agro-success">Connected</span>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
