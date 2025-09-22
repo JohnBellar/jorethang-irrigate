@@ -17,15 +17,17 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex min-h-screen bg-gradient-to-br from-background to-agro-bg-overlay">
-    <Sidebar />
-    <div className="flex-1 flex flex-col">
-      <Header />
-      <main className="flex-1 p-6 overflow-auto">
-        {children}
-      </main>
+  <SidebarProvider>
+    <div className="flex min-h-screen bg-gradient-to-br from-background to-agro-bg-overlay">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <main className="flex-1 p-6 overflow-auto">
+          {children}
+        </main>
+      </div>
     </div>
-  </div>
+  </SidebarProvider>
 );
 
 const App = () => (
@@ -34,17 +36,15 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SidebarProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
-            <Route path="/map" element={<DashboardLayout><Map /></DashboardLayout>} />
-            <Route path="/irrigation" element={<DashboardLayout><Irrigation /></DashboardLayout>} />
-            <Route path="/reports" element={<DashboardLayout><Reports /></DashboardLayout>} />
-            <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </SidebarProvider>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+          <Route path="/map" element={<DashboardLayout><Map /></DashboardLayout>} />
+          <Route path="/irrigation" element={<DashboardLayout><Irrigation /></DashboardLayout>} />
+          <Route path="/reports" element={<DashboardLayout><Reports /></DashboardLayout>} />
+          <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
