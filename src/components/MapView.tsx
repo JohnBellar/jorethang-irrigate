@@ -25,24 +25,42 @@ export default function MapView() {
   };
 
   const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) return;
+    if (!mapContainer.current || !mapboxToken) {
+      console.log('Map initialization failed:', { container: !!mapContainer.current, token: !!mapboxToken });
+      return;
+    }
 
+    console.log('Initializing map with token...');
     mapboxgl.accessToken = mapboxToken;
     
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      zoom: 15,
-      center: [0, 0]
-    });
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/satellite-streets-v12',
+        zoom: 15,
+        center: [0, 0]
+      });
 
-    // Add navigation controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl(),
-      'top-right'
-    );
+      // Add navigation controls
+      map.current.addControl(
+        new mapboxgl.NavigationControl(),
+        'top-right'
+      );
 
-    getUserLocation();
+      map.current.on('load', () => {
+        console.log('Map loaded successfully');
+        getUserLocation();
+      });
+
+      map.current.on('error', (e) => {
+        console.error('Map error:', e);
+        setLocationError('Map failed to load. Please check your Mapbox token.');
+      });
+
+    } catch (error) {
+      console.error('Map initialization error:', error);
+      setLocationError('Failed to initialize map. Please check your Mapbox token.');
+    }
   };
 
   const getUserLocation = () => {
