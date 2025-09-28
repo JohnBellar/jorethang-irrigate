@@ -51,7 +51,25 @@ export default function MapView() {
       return;
     }
 
+    // Check if location permission is already granted
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
+        if (permission.state === 'denied') {
+          setLocationError('Location access denied. Please enable location permissions in your browser settings.');
+          return;
+        }
+      });
+    }
+
     setIsTracking(true);
+    setLocationError('');
+    
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 15000, // Increased timeout to 15 seconds
+      maximumAge: 300000 // 5 minutes
+    };
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -92,14 +110,26 @@ export default function MapView() {
         setIsTracking(false);
       },
       (error) => {
-        setLocationError(`Location error: ${error.message}`);
+        let errorMessage = '';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location access denied. Please allow location access and refresh the page.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information unavailable. Please check your GPS/location services.';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timed out. Please try again or check your connection.';
+            break;
+          default:
+            errorMessage = `Location error: ${error.message}`;
+            break;
+        }
+        setLocationError(errorMessage);
         setIsTracking(false);
+        console.error('Geolocation error:', error);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-      }
+      options
     );
   };
 
@@ -224,11 +254,45 @@ export default function MapView() {
         <div className="relative w-full h-96 overflow-hidden rounded-b-lg">
           <div ref={mapContainer} className="absolute inset-0" />
           
-          {!userLocation && !locationError && (
+          {!userLocation && !locationError && isTracking && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted/50 backdrop-blur-sm">
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-3">
                 <Locate className="h-8 w-8 mx-auto text-muted-foreground animate-pulse" />
-                <p className="text-sm text-muted-foreground">Getting your location...</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Getting your location...</p>
+                  <p className="text-xs text-muted-foreground">Make sure to allow location access</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setIsTracking(false);
+                    setLocationError('Location request cancelled');
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {!userLocation && locationError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/50 backdrop-blur-sm">
+              <div className="text-center space-y-3 p-4">
+                <AlertCircle className="h-8 w-8 mx-auto text-destructive" />
+                <div className="space-y-1">
+                  <p className="text-sm text-destructive font-medium">Location Access Issue</p>
+                  <p className="text-xs text-muted-foreground max-w-sm">{locationError}</p>
+                </div>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={getUserLocation}
+                  className="gap-2"
+                >
+                  <Locate className="h-4 w-4" />
+                  Try Again
+                </Button>
               </div>
             </div>
           )}
